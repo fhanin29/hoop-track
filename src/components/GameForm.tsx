@@ -170,7 +170,7 @@ function GameFormInner({
         </Field>
         <Field label="Durée d’une période">
           <Select value={d.periodLength} onChange={(e) => set({ periodLength: Number(e.target.value) })} disabled={tracked}>
-            {[5, 6, 7, 8, 10, 12, 15, 20].map((m) => (
+            {[...new Set([5, 6, 7, 8, 10, 12, 15, 20, 25, 30, d.periodLength])].sort((a, b) => a - b).map((m) => (
               <option key={m} value={m}>
                 {m} min
               </option>

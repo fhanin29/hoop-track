@@ -261,33 +261,39 @@ function LiveBoard({
   return (
     <div className="flex h-full flex-col overflow-hidden bg-slate-950" data-testid="live">
       {/* Barre du haut */}
-      <header className="flex h-20 shrink-0 items-center gap-3 border-b border-slate-800 bg-slate-900 px-3">
-        <Link to={`/matchs/${game.id}`} className="flex h-12 w-12 items-center justify-center rounded-xl text-slate-300 hover:bg-slate-800" aria-label="Retour">
+      {/* Smartphone : 2 lignes (retour, score, options / période, chrono, actions) ; tablette : 1 ligne */}
+      <header className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1.5 border-b border-slate-800 bg-slate-900 px-2 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:h-20 md:flex-nowrap md:gap-3 md:px-3 md:py-0">
+        <Link
+          to={`/matchs/${game.id}`}
+          className="order-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-300 hover:bg-slate-800 md:order-none md:h-12 md:w-12"
+          aria-label="Retour"
+        >
           <ArrowLeft size={26} />
         </Link>
 
-        <div className="flex items-center gap-3 rounded-2xl bg-black/30 px-4 py-1.5">
-          <div className="text-right">
-            <div className="max-w-36 truncate text-xs font-semibold uppercase tracking-wide text-team">{teamName}</div>
+        <div className="order-2 flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-black/30 px-2 py-1 md:order-none md:flex-none md:gap-3 md:px-4 md:py-1.5">
+          <div className="min-w-0 flex-1 text-right md:flex-none">
+            <div className="truncate text-xs font-semibold uppercase tracking-wide text-team md:max-w-36">{teamName}</div>
             <div className="text-xs text-slate-500">Fautes {foulBadge(teamFouls)}</div>
           </div>
-          <div className="font-mono text-4xl font-black tabular-nums" data-testid="score">
+          <div className="shrink-0 font-mono text-3xl font-black tabular-nums md:text-4xl" data-testid="score">
             <span className="text-white">{live.usScore}</span>
-            <span className="mx-1.5 text-slate-600">-</span>
+            <span className="mx-1 text-slate-600 md:mx-1.5">-</span>
             <span className="text-slate-300">{live.oppScore}</span>
           </div>
-          <div>
-            <div className="max-w-36 truncate text-xs font-semibold uppercase tracking-wide text-slate-400">{game.opponent}</div>
+          <div className="min-w-0 flex-1 md:flex-none">
+            <div className="truncate text-xs font-semibold uppercase tracking-wide text-slate-400 md:max-w-36">{game.opponent}</div>
             <div className="text-xs text-slate-500">Fautes {foulBadge(oppFouls)}</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 rounded-xl bg-slate-800 px-3 py-2 text-xl font-bold" data-testid="period">
+        <div className="order-5 flex items-center gap-1 rounded-xl bg-slate-800 px-3 py-2 text-lg font-bold md:order-none md:text-xl" data-testid="period">
           {pLabel}
         </div>
 
         {game.clockEnabled ? (
           <ClockControl
+            className="order-6 md:order-none"
             game={game}
             onExpire={() => {
               vibrate([300, 120, 300])
@@ -295,31 +301,32 @@ function LiveBoard({
             }}
           />
         ) : (
-          <span className="text-sm text-slate-500">Chrono non suivi</span>
+          <span className="order-6 text-sm text-slate-500 md:order-none">Chrono non suivi</span>
         )}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="order-7 ml-auto flex items-center gap-2 md:order-none">
           {canFinish ? (
-            <Button variant="danger" onClick={() => setDialog('finish')}>
+            <Button variant="danger" size="sm" className="md:h-12 md:px-4 md:text-base" onClick={() => setDialog('finish')}>
               <Flag size={20} /> Terminer
             </Button>
           ) : (
-            <Button onClick={() => setDialog('next')}>
+            <Button size="sm" className="md:h-12 md:px-4 md:text-base" onClick={() => setDialog('next')}>
               <SkipForward size={20} /> {isLastRegular ? 'Prolongation' : `QT${period + 1}`}
             </Button>
           )}
-          <Button className="min-[1180px]:hidden" onClick={() => setDialog('journal')} aria-label="Journal">
+          <Button size="sm" className="md:h-12 md:px-4 min-[1180px]:hidden" onClick={() => setDialog('journal')} aria-label="Journal">
             <History size={20} />
           </Button>
-          <Button variant="ghost" onClick={() => setDialog('options')} aria-label="Options">
-            <Settings2 size={22} />
-          </Button>
         </div>
+        <Button variant="ghost" className="order-3 w-10 shrink-0 px-0! md:order-none md:w-12" onClick={() => setDialog('options')} aria-label="Options">
+          <Settings2 size={22} />
+        </Button>
+        <div className="order-4 h-0 basis-full md:hidden" />
       </header>
 
-      <div className="flex min-h-0 flex-1 gap-3 p-3">
-        {/* Joueurs sur le terrain */}
-        <aside className="flex w-56 shrink-0 flex-col gap-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:flex-row md:gap-3 md:p-3">
+        {/* Joueurs sur le terrain : en ligne sur smartphone, en colonne sur tablette */}
+        <aside className="flex shrink-0 gap-1.5 md:w-56 md:flex-col md:gap-2">
           {live.onCourt.map((pid) => {
             const p = players.get(pid)
             const fouls = live.fouls[pid] ?? 0
@@ -332,37 +339,42 @@ function LiveBoard({
                 onClick={() => onPlayer(pid)}
                 data-testid={`oncourt-${p?.number}`}
                 className={cn(
-                  'relative flex min-h-0 flex-1 items-center gap-3 rounded-2xl border px-3 text-left transition active:scale-[0.98]',
+                  'relative flex min-h-0 min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl border px-0.5 py-1.5 text-center transition active:scale-[0.98] md:flex-row md:gap-3 md:rounded-2xl md:px-3 md:py-0 md:text-left',
                   isSel ? 'border-team bg-team/25 ring-2 ring-team' : 'border-slate-800 bg-slate-900 hover:bg-slate-800',
                   pending && !excluded && 'border-amber-400/70 bg-amber-400/10',
                   excluded && 'opacity-40',
                 )}
               >
-                <Jersey number={p?.number ?? '?'} className={cn('h-12 w-12 text-2xl', isSel && 'bg-team text-white')} />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-lg font-bold leading-tight">{p ? p.lastName || p.firstName : '?'}</span>
-                  <span className="text-sm text-slate-400">
+                <Jersey number={p?.number ?? '?'} className={cn('size-9! text-lg md:size-12! md:text-2xl', isSel && 'bg-team text-white')} />
+                <span className="w-full min-w-0 md:w-auto md:flex-1">
+                  <span className="block truncate text-xs font-bold leading-tight md:text-lg">{p ? p.lastName || p.firstName : '?'}</span>
+                  <span className="text-[11px] text-slate-400 md:text-sm">
                     <b className="text-slate-200">{live.points[pid] ?? 0}</b> pts
                   </span>
                 </span>
-                <span className="flex flex-col gap-0.5" aria-label={`${fouls} fautes`}>
+                <span className="flex gap-0.5 md:flex-col" aria-label={`${fouls} fautes`}>
                   {Array.from({ length: MAX_FOULS }, (_, i) => (
-                    <span key={i} className={cn('h-1.5 w-4 rounded-full', i < fouls ? (fouls >= 4 ? 'bg-red-500' : 'bg-amber-400') : 'bg-slate-700')} />
+                    <span key={i} className={cn('h-1 w-1.5 rounded-full md:h-1.5 md:w-4', i < fouls ? (fouls >= 4 ? 'bg-red-500' : 'bg-amber-400') : 'bg-slate-700')} />
                   ))}
                 </span>
               </button>
             )
           })}
-          <Button size="lg" onClick={() => setSubOpen({})} className="shrink-0">
-            <ArrowRightLeft size={22} /> Changer
-          </Button>
+          <button
+            type="button"
+            onClick={() => setSubOpen({})}
+            aria-label="Changer"
+            className="flex w-11 shrink-0 select-none items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 text-lg font-semibold text-slate-100 transition hover:bg-slate-700 active:scale-[0.97] md:h-14 md:w-auto md:px-6"
+          >
+            <ArrowRightLeft size={22} /> <span className="hidden md:inline">Changer</span>
+          </button>
         </aside>
 
         {/* Terrain */}
         <section className="relative flex min-w-0 flex-1 flex-col">
           <div
             className={cn(
-              'mb-2 flex h-10 shrink-0 items-center justify-between gap-2 rounded-xl px-3 text-sm font-semibold',
+              'mb-2 flex h-9 shrink-0 items-center justify-between gap-2 rounded-xl px-3 text-xs font-semibold md:h-10 md:text-sm',
               pending ? 'bg-amber-400/15 text-amber-200' : 'bg-slate-900 text-slate-400',
             )}
             data-testid="guide"
@@ -390,7 +402,7 @@ function LiveBoard({
               marker={draft ? { ...draft, three: draft.points === 3 } : pending?.kind === 'shot' ? { ...pending.draft, three: pending.draft.points === 3 } : null}
             />
             {draft && (
-              <div className="absolute inset-x-4 bottom-4 z-20 rounded-2xl border border-slate-700 bg-slate-900/95 p-3 shadow-2xl backdrop-blur animate-pop" data-testid="shot-panel">
+              <div className="absolute inset-x-1 bottom-1 z-20 rounded-2xl border border-slate-700 bg-slate-900/95 p-2 shadow-2xl backdrop-blur animate-pop md:inset-x-4 md:bottom-4 md:p-3" data-testid="shot-panel">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-sm text-slate-400">{ZONES[draft.zone].label}</span>
                   <Segmented
@@ -403,13 +415,13 @@ function LiveBoard({
                   />
                 </div>
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
-                  <button type="button" onClick={() => onShotResult(true)} className="h-16 rounded-xl bg-emerald-600 text-xl font-bold text-white hover:bg-emerald-500 active:scale-[0.98]">
+                  <button type="button" onClick={() => onShotResult(true)} className="h-14 md:h-16 rounded-xl bg-emerald-600 text-xl font-bold text-white hover:bg-emerald-500 active:scale-[0.98]">
                     Réussi
                   </button>
-                  <button type="button" onClick={() => onShotResult(false)} className="h-16 rounded-xl bg-red-600 text-xl font-bold text-white hover:bg-red-500 active:scale-[0.98]">
+                  <button type="button" onClick={() => onShotResult(false)} className="h-14 md:h-16 rounded-xl bg-red-600 text-xl font-bold text-white hover:bg-red-500 active:scale-[0.98]">
                     Raté
                   </button>
-                  <button type="button" onClick={() => setDraft(null)} className="h-16 rounded-xl bg-slate-800 px-4 font-semibold text-slate-300 hover:bg-slate-700">
+                  <button type="button" onClick={() => setDraft(null)} className="h-14 md:h-16 rounded-xl bg-slate-800 px-4 font-semibold text-slate-300 hover:bg-slate-700">
                     ✕
                   </button>
                 </div>
@@ -420,15 +432,15 @@ function LiveBoard({
         </section>
 
         {/* Actions */}
-        <section className="flex w-60 shrink-0 flex-col gap-2">
-          <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-5 gap-2">
+        <section className="flex shrink-0 flex-col gap-2 md:w-60">
+          <div className="grid grid-cols-5 gap-1.5 md:min-h-0 md:flex-1 md:grid-cols-2 md:grid-rows-5 md:gap-2">
             {PAD.map((a) => (
               <button
                 key={a.action}
                 type="button"
                 onClick={() => onPad(a.action)}
                 className={cn(
-                  'rounded-xl px-1 text-base font-bold leading-tight shadow transition active:scale-[0.96]',
+                  'h-14 rounded-xl px-0.5 text-sm font-bold leading-tight shadow transition active:scale-[0.96] md:h-auto md:px-1 md:text-base',
                   TONE_CLASSES[a.tone].btn,
                   pending?.kind === 'pad' && pending.action === a.action && 'ring-4 ring-amber-300',
                 )}
@@ -437,11 +449,11 @@ function LiveBoard({
               </button>
             ))}
           </div>
-          <div className="shrink-0 rounded-xl border border-slate-800 bg-slate-900 p-2">
-            <div className="mb-1.5 truncate text-center text-xs font-semibold uppercase tracking-wide text-slate-400">{game.opponent}</div>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 p-1.5 md:block md:p-2">
+            <div className="w-20 shrink-0 truncate text-center text-xs font-semibold uppercase tracking-wide text-slate-400 md:mb-1.5 md:w-auto">{game.opponent}</div>
+            <div className="grid flex-1 grid-cols-3 gap-1.5 md:gap-2">
               {[1, 2, 3].map((n) => (
-                <button key={n} type="button" onClick={() => oppScore(n)} className="h-14 rounded-xl bg-slate-700 text-xl font-black text-white hover:bg-slate-600 active:scale-[0.96]">
+                <button key={n} type="button" onClick={() => oppScore(n)} className="h-11 rounded-xl bg-slate-700 text-lg font-black text-white hover:bg-slate-600 active:scale-[0.96] md:h-14 md:text-xl">
                   +{n}
                 </button>
               ))}

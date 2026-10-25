@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { BarChart3, CalendarPlus, Database, Flame, Plus, Radio, Trophy, UserPlus } from 'lucide-react'
+import { BarChart3, CalendarPlus, ChevronRight, Database, Flame, Plus, Radio, Trophy, UserPlus } from 'lucide-react'
 import { fmt1, perGame, reb, type SeasonStats } from '../domain/stats'
 import type { Game, Player } from '../domain/types'
 import { seedDemoSeason } from '../db/demo'
@@ -57,11 +57,11 @@ export default function Dashboard() {
       toast('Données de démonstration chargées')
     }
     return (
-      <div className="mx-auto flex max-w-2xl flex-col items-center py-16 text-center">
+      <div className="mx-auto flex max-w-2xl flex-col items-center py-8 text-center sm:py-16">
         <div className="mb-6 rounded-3xl bg-team/15 p-6 text-team">
           <Trophy size={64} />
         </div>
-        <h1 className="text-4xl font-black">Bienvenue dans Hoop Track</h1>
+        <h1 className="text-3xl font-black sm:text-4xl">Bienvenue dans Hoop Track</h1>
         <p className="mt-3 text-lg text-slate-400">
           Suivez votre équipe toute la saison : effectif, matchs, saisie des actions en direct et statistiques détaillées.
         </p>
@@ -105,14 +105,16 @@ export default function Dashboard() {
       {live && (
         <Link
           to={`/matchs/${live.id}/live`}
-          className="mb-5 flex items-center gap-4 rounded-2xl border border-red-500/50 bg-red-500/10 p-4 transition hover:bg-red-500/15"
+          className="mb-5 flex items-center gap-3 rounded-2xl border border-red-500/50 bg-red-500/10 p-3 transition hover:bg-red-500/15 sm:gap-4 sm:p-4"
         >
           <Radio className="animate-pulse text-red-400" size={28} />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase tracking-wider text-red-300">Match en cours</div>
-            <div className="text-lg font-bold">contre {live.opponent}</div>
+            <div className="truncate text-lg font-bold">contre {live.opponent}</div>
           </div>
-          <span className="rounded-xl bg-red-600 px-4 py-2 font-bold text-white">Reprendre la saisie</span>
+          <span className="shrink-0 rounded-xl bg-red-600 px-3 py-2 font-bold text-white sm:px-4">
+            Reprendre<span className="hidden sm:inline"> la saisie</span>
+          </span>
         </Link>
       )}
 
@@ -209,13 +211,13 @@ export default function Dashboard() {
 function NextGame({ game }: { game: Game }) {
   const soon = isUpcoming(game.date)
   return (
-    <Link to={`/matchs/${game.id}`} className="flex items-center gap-4 rounded-xl bg-slate-800/50 p-4 hover:bg-slate-800">
-      <div className="flex h-14 w-14 flex-col items-center justify-center rounded-xl bg-team/15 text-team">
+    <Link to={`/matchs/${game.id}`} className="flex items-center gap-3 rounded-xl bg-slate-800/50 p-3 hover:bg-slate-800 sm:gap-4 sm:p-4">
+      <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-team/15 text-team">
         <span className="text-xl font-black leading-none">{game.date.slice(8, 10)}</span>
         <span className="text-xs font-bold uppercase">{new Date(game.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
       </div>
-      <div className="flex-1">
-        <div className="text-xl font-bold">
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-lg font-bold sm:text-xl">
           {game.homeAway === 'home' ? 'vs' : '@'} {game.opponent}
         </div>
         <div className="text-sm text-slate-400">
@@ -223,7 +225,8 @@ function NextGame({ game }: { game: Game }) {
           {game.competition && ` · ${game.competition}`}
         </div>
       </div>
-      <span className={cn('rounded-xl px-4 py-2 font-bold', soon ? 'bg-team text-white' : 'bg-slate-700 text-slate-200')}>Préparer</span>
+      <span className={cn('hidden rounded-xl px-4 py-2 font-bold sm:block', soon ? 'bg-team text-white' : 'bg-slate-700 text-slate-200')}>Préparer</span>
+      <ChevronRight className="shrink-0 text-slate-500 sm:hidden" size={22} />
     </Link>
   )
 }

@@ -47,8 +47,9 @@ export function Layout() {
     [season?.id],
   )
   return (
-    <div className="flex h-full">
-      <nav className="no-print flex w-24 shrink-0 flex-col items-center gap-1 border-r border-slate-800 bg-slate-950 py-4">
+    <div className="flex h-full flex-col md:flex-row">
+      {/* Tablette / ordinateur : rail de navigation à gauche */}
+      <nav className="no-print hidden w-24 shrink-0 flex-col items-center gap-1 border-r border-slate-800 bg-slate-950 py-4 md:flex">
         <Link to="/" className="mb-4" aria-label="Hoop Track">
           <Logo size={48} />
         </Link>
@@ -78,11 +79,47 @@ export function Layout() {
           </Link>
         )}
       </nav>
-      <main className="scrollbar-thin flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-6 py-6 lg:px-8">
+      <main className="scrollbar-thin min-h-0 flex-1 overflow-y-auto pt-[env(safe-area-inset-top)] md:pt-0">
+        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
           <Outlet />
         </div>
       </main>
+      {/* Smartphone : barre d'onglets en bas, à portée de pouce */}
+      <nav className="no-print shrink-0 border-t border-slate-800 bg-slate-950/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label="Navigation principale">
+        {liveGame && (
+          <Link
+            to={`/matchs/${liveGame.id}/live`}
+            className="flex items-center justify-center gap-2 bg-red-600 py-2 text-sm font-bold text-white"
+          >
+            <Radio size={18} className="animate-pulse" />
+            Match en direct : reprendre la saisie
+          </Link>
+        )}
+        <div className="grid grid-cols-5">
+          {NAV.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                cn(
+                  'flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-semibold',
+                  isActive ? 'text-team' : 'text-slate-400 active:text-slate-200',
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={cn('flex h-8 w-14 items-center justify-center rounded-full', isActive && 'bg-team/15')}>
+                    <Icon size={22} />
+                  </span>
+                  {label}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </div>
   )
 }
