@@ -98,8 +98,8 @@ test('saisie d’un match en direct, de la préparation au résumé', async ({ p
 
   await page.screenshot({ path: 'e2e/screenshots/live-test.png' })
 
-  // Fin du match : on enchaîne les quart-temps puis on termine
-  for (const qt of [2, 3, 4]) {
+  // Fin du match : on passe à la 2e mi-temps (format par défaut) puis on termine
+  for (const qt of [2]) {
     await page.getByRole('button', { name: `QT${qt}`, exact: true }).click()
     await page.getByRole('button', { name: `Commencer le QT${qt}` }).click()
     await expect(page.getByTestId('period')).toContainText(String(qt))

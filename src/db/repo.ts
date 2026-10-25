@@ -14,8 +14,8 @@ export interface AppSettings {
 
 export const DEFAULT_SETTINGS: AppSettings = {
   defaultClockEnabled: true,
-  defaultPeriods: 4,
-  defaultPeriodLength: 10,
+  defaultPeriods: 2,
+  defaultPeriodLength: 30,
   vibration: true,
 }
 
