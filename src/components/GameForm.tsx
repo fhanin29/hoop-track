@@ -5,6 +5,8 @@ import { useSettings } from '../hooks/data'
 import { Button, Field, Input, Modal, Segmented, Select, Toggle } from './ui'
 import { toast } from './toast'
 
+const PERIOD_LENGTHS = [5, 6, 7, 8, 10, 12, 15, 20, 25, 30]
+
 interface Draft {
   day: string
   time: string
@@ -170,7 +172,7 @@ function GameFormInner({
         </Field>
         <Field label="Durée d’une période">
           <Select value={d.periodLength} onChange={(e) => set({ periodLength: Number(e.target.value) })} disabled={tracked}>
-            {[5, 6, 7, 8, 10, 12, 15, 20].map((m) => (
+            {[...new Set([...PERIOD_LENGTHS, d.periodLength])].sort((a, b) => a - b).map((m) => (
               <option key={m} value={m}>
                 {m} min
               </option>
