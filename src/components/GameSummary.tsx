@@ -92,7 +92,7 @@ export function GameSummary({ game, events, players, season }: { game: Game; eve
           title={`Carte des tirs (${shots.length})`}
           action={
             <div className="flex items-center gap-2">
-              <Select value={shotPlayer} onChange={(e) => setShotPlayer(e.target.value)} className="h-10 w-56 text-sm">
+              <Select value={shotPlayer} onChange={(e) => setShotPlayer(e.target.value)} className="h-10 w-40 text-sm sm:w-56">
                 <option value="">Toute l’équipe</option>
                 {shooters.map((r) => (
                   <option key={r.id} value={r.id}>

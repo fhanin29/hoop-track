@@ -79,13 +79,18 @@ test('saisie d’un match en direct, de la préparation au résumé', async ({ p
   // Panier adverse puis annulation
   await page.getByRole('button', { name: '+2' }).click()
   await expect(score).toHaveText(/3\D+2/)
-  await page.getByTestId('undo').click()
+  // Sur petit écran, le journal n'est pas affiché en colonne : on l'ouvre en modale
+  const journalInColumn = await page.getByTestId('journal').isVisible()
+  if (!journalInColumn) await page.getByRole('button', { name: 'Journal', exact: true }).click()
+  const journalScope = journalInColumn ? page : page.getByRole('dialog')
+  await journalScope.getByTestId('undo').click()
   await expect(score).toHaveText(/3\D+0/)
 
   // Journal
-  const journal = page.getByTestId('journal')
+  const journal = journalScope.getByTestId('journal')
   await expect(journal).toContainText('Passe décisive')
   await expect(journal).toContainText('Faute')
+  if (!journalInColumn) await page.keyboard.press('Escape')
 
   // Changement : #14 sort, #15 entre
   await page.getByRole('button', { name: 'Changer' }).click()
@@ -98,8 +103,8 @@ test('saisie d’un match en direct, de la préparation au résumé', async ({ p
 
   await page.screenshot({ path: 'e2e/screenshots/live-test.png' })
 
-  // Fin du match : on enchaîne les quart-temps puis on termine
-  for (const qt of [2, 3, 4]) {
+  // Fin du match : on passe à la 2e mi-temps (format par défaut) puis on termine
+  for (const qt of [2]) {
     await page.getByRole('button', { name: `QT${qt}`, exact: true }).click()
     await page.getByRole('button', { name: `Commencer le QT${qt}` }).click()
     await expect(page.getByTestId('period')).toContainText(String(qt))

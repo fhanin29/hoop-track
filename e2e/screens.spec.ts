@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
 
 // Parcourt toutes les pages avec la saison de démonstration : aucune erreur console, captures pour revue visuelle
-test('pages avec données de démonstration', async ({ page }) => {
+test('pages avec données de démonstration', async ({ page }, testInfo) => {
+  const dir = testInfo.project.name === 'smartphone' ? 'e2e/screenshots/smartphone' : 'e2e/screenshots'
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(e.message))
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
@@ -9,7 +10,7 @@ test('pages avec données de démonstration', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Charger la démo' }).click()
   await expect(page.getByText('Meilleurs joueurs').or(page.getByText('Leaders')).first()).toBeVisible()
-  const shot = (name: string) => page.screenshot({ path: `e2e/screenshots/${name}.png` })
+  const shot = (name: string) => page.screenshot({ path: `${dir}/${name}.png` })
   const bottom = async (name: string) => {
     await page.locator('main').evaluate((el) => el.scrollTo(0, el.scrollHeight))
     await page.waitForTimeout(400)

@@ -147,8 +147,8 @@ export default function Settings() {
                 value={settings.defaultPeriods}
                 onChange={(v) => setSetting('defaultPeriods', v)}
                 options={[
-                  { value: 4, label: '4 quarts-temps' },
                   { value: 2, label: '2 mi-temps' },
+                  { value: 4, label: '4 quarts-temps' },
                 ]}
               />
             </Field>

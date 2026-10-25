@@ -16,13 +16,13 @@ export function GameCard({ game, score }: { game: Game; score?: { us: number; op
     <Link
       to={game.status === 'live' ? `/matchs/${game.id}/live` : `/matchs/${game.id}`}
       className={cn(
-        'flex items-center gap-4 rounded-2xl border bg-slate-900/70 p-4 transition hover:bg-slate-900',
+        'flex items-center gap-3 rounded-2xl border bg-slate-900/70 p-3 transition hover:bg-slate-900 sm:gap-4 sm:p-4',
         game.status === 'live' ? 'border-red-500/50' : 'border-slate-800',
       )}
     >
       <div
         className={cn(
-          'flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl text-xs font-bold',
+          'flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl text-xs font-bold sm:h-14 sm:w-14',
           game.status === 'live' ? 'bg-red-600 text-white' : finished ? (win ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400') : 'bg-slate-800 text-slate-300',
         )}
       >
@@ -41,23 +41,23 @@ export function GameCard({ game, score }: { game: Game; score?: { us: number; op
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-500">{game.homeAway === 'home' ? 'vs' : '@'}</span>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="shrink-0 text-slate-500">{game.homeAway === 'home' ? 'vs' : '@'}</span>
           <span className="truncate text-lg font-bold">{game.opponent}</span>
-          {game.manualResult && <Badge>Score seul</Badge>}
+          {game.manualResult && <Badge className="shrink-0 max-sm:hidden">Score seul</Badge>}
         </div>
         <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-sm text-slate-400">
           <span>{formatDateTime(game.date)}</span>
-          {game.competition && <span>· {game.competition}</span>}
+          {game.competition && <span className="hidden sm:inline">· {game.competition}</span>}
           {game.location && (
-            <span className="flex items-center gap-1">
+            <span className="hidden items-center gap-1 sm:flex">
               <MapPin size={14} /> {game.location}
             </span>
           )}
         </div>
       </div>
       {score && (finished || game.status === 'live') && (
-        <div className="text-right text-2xl font-black tabular-nums">
+        <div className="shrink-0 text-right text-xl font-black tabular-nums sm:text-2xl">
           <span className={cn(win && 'text-emerald-400')}>{score.us}</span>
           <span className="mx-1 text-slate-600">–</span>
           <span className={cn(!win && finished && 'text-red-400')}>{score.opp}</span>
@@ -94,7 +94,7 @@ export default function Games() {
         }
       />
       <Segmented
-        className="mb-4"
+        className="mb-4 w-full sm:w-auto"
         value={filter}
         onChange={setFilter}
         options={[

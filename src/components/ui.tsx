@@ -42,9 +42,9 @@ export function Button({
 
 export function Card({ className, children, title, action }: { className?: string; children: ReactNode; title?: ReactNode; action?: ReactNode }) {
   return (
-    <section className={cn('rounded-2xl border border-slate-800 bg-slate-900/70 p-4', className)}>
+    <section className={cn('min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-3 sm:p-4', className)}>
       {(title || action) && (
-        <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           {title && <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">{title}</h2>}
           {action}
         </div>
@@ -77,24 +77,27 @@ export function Modal({
   }, [open, onClose])
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onPointerDown={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4"
+      onPointerDown={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
         className={cn(
-          'flex max-h-[92vh] w-full flex-col rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl animate-pop',
+          'flex max-h-[92dvh] w-full flex-col rounded-t-2xl border border-slate-700 bg-slate-900 pb-[env(safe-area-inset-bottom)] shadow-2xl animate-pop sm:rounded-2xl sm:pb-0',
           wide ? 'max-w-3xl' : 'max-w-lg',
         )}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-3">
-          <h2 className="text-lg font-bold">{title}</h2>
+        <div className="flex items-center justify-between gap-2 border-b border-slate-800 px-4 py-3 sm:px-5">
+          <h2 className="min-w-0 truncate text-lg font-bold">{title}</h2>
           <button type="button" aria-label="Fermer" onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-800">
             <X size={22} />
           </button>
         </div>
-        <div className="overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="flex justify-end gap-2 border-t border-slate-800 px-5 py-3">{footer}</div>}
+        <div className="overflow-y-auto px-4 py-4 sm:px-5">{children}</div>
+        {footer && <div className="flex flex-wrap justify-end gap-2 border-t border-slate-800 px-4 py-3 sm:px-5">{footer}</div>}
       </div>
     </div>
   )
@@ -178,7 +181,7 @@ export function Segmented<T extends string | number>({
           key={String(o.value)}
           onClick={() => onChange(o.value)}
           className={cn(
-            'min-h-10 flex-1 whitespace-nowrap rounded-lg px-3 text-sm font-semibold transition',
+            'min-h-10 flex-1 whitespace-nowrap rounded-lg px-2 text-sm font-semibold transition sm:px-3',
             o.value === value ? 'bg-team text-white' : 'text-slate-400 hover:text-slate-200',
           )}
         >
@@ -214,9 +217,9 @@ export function Badge({ children, tone = 'slate', className }: { children: React
 
 export function PageHeader({ title, subtitle, actions }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
+    <header className="mb-5 flex flex-wrap items-end justify-between gap-3 sm:mb-6 sm:gap-4">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
         {subtitle && <p className="mt-1 text-slate-400">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -226,7 +229,7 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
 
 export function EmptyState({ icon, title, children }: { icon: ReactNode; title: string; children?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-700 px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-700 px-4 py-10 text-center sm:px-6 sm:py-14">
       <div className="text-slate-500">{icon}</div>
       <h3 className="text-lg font-semibold">{title}</h3>
       {children && <div className="max-w-md text-slate-400">{children}</div>}
@@ -236,9 +239,9 @@ export function EmptyState({ icon, title, children }: { icon: ReactNode; title: 
 
 export function StatTile({ label, value, sub, accent }: { label: string; value: ReactNode; sub?: ReactNode; accent?: boolean }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-      <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</div>
-      <div className={cn('mt-1 text-3xl font-extrabold tabular-nums', accent && 'text-team')}>{value}</div>
+    <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-3 sm:p-4">
+      <div className="truncate text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</div>
+      <div className={cn('mt-1 text-2xl font-extrabold tabular-nums sm:text-3xl', accent && 'text-team')}>{value}</div>
       {sub && <div className="mt-0.5 text-sm text-slate-500">{sub}</div>}
     </div>
   )

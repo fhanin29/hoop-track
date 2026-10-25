@@ -61,15 +61,15 @@ export default function GameDetail() {
         </Link>
       </div>
 
-      <header className="mb-6 flex flex-wrap items-center gap-6 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6">
-        <div className="min-w-0 flex-1">
+      <header className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-4 sm:gap-6 sm:p-6">
+        <div className="w-full min-w-0 sm:w-auto sm:flex-1">
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
             <span>{formatDateTime(game.date)}</span>
             <Badge>{game.homeAway === 'home' ? 'Domicile' : 'Extérieur'}</Badge>
             {game.competition && <Badge tone="blue">{game.competition}</Badge>}
             {game.status === 'live' && <Badge tone="red">EN DIRECT</Badge>}
           </div>
-          <h1 className="mt-2 text-3xl font-extrabold">
+          <h1 className="mt-2 text-2xl font-extrabold sm:text-3xl">
             {season.teamName} <span className="text-slate-500">{game.homeAway === 'home' ? 'vs' : '@'}</span> {game.opponent}
           </h1>
           {game.location && (
@@ -79,7 +79,7 @@ export default function GameDetail() {
           )}
         </div>
         {us !== undefined && opp !== undefined && game.status !== 'planned' && (
-          <div className="text-center">
+          <div className="w-full text-center sm:w-auto">
             <div className="text-5xl font-black tabular-nums">
               <span className={cn(win && 'text-emerald-400')}>{us}</span>
               <span className="mx-2 text-slate-600">–</span>
