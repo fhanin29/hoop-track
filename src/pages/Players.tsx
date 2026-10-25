@@ -134,18 +134,18 @@ export default function Players() {
         </EmptyState>
       ) : (
         <>
-          <div className="overflow-hidden rounded-2xl border border-slate-800">
+          <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-slate-800">
             <table className="w-full text-left">
               <thead className="bg-slate-900 text-xs uppercase tracking-wider text-slate-400">
                 <tr>
-                  <th className="px-4 py-3">Joueur</th>
-                  <th className="px-2 py-3">Poste</th>
-                  <th className="px-2 py-3 text-right">MJ</th>
+                  <th className="px-3 py-3 sm:px-4">Joueur</th>
+                  <th className="hidden px-2 py-3 sm:table-cell">Poste</th>
+                  <th className="hidden px-2 py-3 text-right sm:table-cell">MJ</th>
                   <th className="px-2 py-3 text-right">PTS</th>
                   <th className="px-2 py-3 text-right">REB</th>
                   <th className="px-2 py-3 text-right">PD</th>
-                  <th className="px-2 py-3 text-right">ÉVAL</th>
-                  <th className="w-28" />
+                  <th className="px-2 py-3 pr-3 text-right sm:pr-2">ÉVAL</th>
+                  <th className="hidden w-28 sm:table-cell" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
@@ -154,20 +154,20 @@ export default function Players() {
                   const avg = (v: number) => (s ? fmt1(perGame(v, s.gp)) : '–')
                   return (
                     <tr key={p.id} className="bg-slate-950 transition hover:bg-slate-900">
-                      <td className="px-4 py-2">
-                        <Link to={`/joueurs/${p.id}`} className="flex items-center gap-3">
+                      <td className="px-3 py-2 sm:px-4">
+                        <Link to={`/joueurs/${p.id}`} className="flex items-center gap-2 sm:gap-3">
                           <Jersey number={p.number} muted={!p.active} />
-                          <span className="text-base font-semibold">{playerName(p)}</span>
-                          {!p.active && <Badge>Inactif</Badge>}
+                          <span className="text-sm font-semibold leading-tight sm:text-base">{playerName(p)}</span>
+                          {!p.active && <Badge className="max-sm:hidden">Inactif</Badge>}
                         </Link>
                       </td>
-                      <td className="px-2 text-slate-400">{p.position ? POSITIONS[p.position] : '–'}</td>
-                      <td className="px-2 text-right tabular-nums text-slate-400">{s?.gp ?? 0}</td>
+                      <td className="hidden px-2 text-slate-400 sm:table-cell">{p.position ? POSITIONS[p.position] : '–'}</td>
+                      <td className="hidden px-2 text-right tabular-nums text-slate-400 sm:table-cell">{s?.gp ?? 0}</td>
                       <td className="px-2 text-right font-bold tabular-nums">{avg(s?.totals.pts ?? 0)}</td>
                       <td className="px-2 text-right tabular-nums">{s ? avg(reb(s.totals)) : '–'}</td>
                       <td className="px-2 text-right tabular-nums">{avg(s?.totals.ast ?? 0)}</td>
-                      <td className="px-2 text-right tabular-nums">{avg(s?.evalTotal ?? 0)}</td>
-                      <td className="px-2">
+                      <td className="px-2 pr-3 text-right tabular-nums sm:pr-2">{avg(s?.evalTotal ?? 0)}</td>
+                      <td className="hidden px-2 sm:table-cell">
                         <div className="flex justify-end gap-1">
                           <Button size="sm" variant="ghost" aria-label={`Modifier ${playerName(p)}`} onClick={() => open(p)}>
                             <Pencil size={18} />

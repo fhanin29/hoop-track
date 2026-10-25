@@ -7,7 +7,7 @@ import { useNow } from '../../hooks/data'
 import { Button, Input, Modal, cn } from '../ui'
 
 /** Chrono : se rafraîchit seul pour ne pas re-rendre toute la page de saisie */
-export function ClockControl({ game, onExpire }: { game: Game; onExpire: () => void }) {
+export function ClockControl({ game, onExpire, className }: { game: Game; onExpire: () => void; className?: string }) {
   const now = useNow(game.clock.running, 200)
   const remaining = clockRemaining(game.clock, now)
   const expired = game.clock.running && remaining <= 0
@@ -27,12 +27,12 @@ export function ClockControl({ game, onExpire }: { game: Game; onExpire: () => v
   const lastMinute = remaining < 60_000
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn('flex items-center gap-2', className)}>
       <button
         type="button"
         onClick={() => setEditing(true)}
         className={cn(
-          'min-w-28 rounded-xl bg-black/40 px-3 py-1 text-center font-mono text-4xl font-bold tabular-nums tracking-tight',
+          'min-w-20 rounded-xl bg-black/40 px-2 py-1 text-center font-mono text-2xl font-bold tabular-nums tracking-tight md:min-w-28 md:px-3 md:text-4xl',
           game.clock.running ? (lastMinute ? 'text-red-400' : 'text-emerald-300') : 'text-amber-300',
         )}
         aria-label="Modifier le chrono"
@@ -46,11 +46,11 @@ export function ClockControl({ game, onExpire }: { game: Game; onExpire: () => v
         disabled={!game.clock.running && remaining <= 0}
         aria-label={game.clock.running ? 'Arrêter le chrono' : 'Démarrer le chrono'}
         className={cn(
-          'flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition active:scale-95 disabled:opacity-30',
+          'flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition active:scale-95 disabled:opacity-30 md:h-14 md:w-14',
           game.clock.running ? 'bg-amber-500 shadow-amber-500/30' : 'bg-emerald-600 shadow-emerald-600/30',
         )}
       >
-        {game.clock.running ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
+        {game.clock.running ? <Pause size={22} fill="currentColor" className="md:size-7" /> : <Play size={22} fill="currentColor" className="ml-0.5 md:ml-1 md:size-7" />}
       </button>
       {editing && <ClockEditModal game={game} remaining={remaining} onClose={() => setEditing(false)} />}
     </div>
@@ -89,7 +89,7 @@ function ClockEditModal({ game, remaining, onClose }: { game: Game; remaining: n
         </>
       }
     >
-      <div className="mb-5 grid grid-cols-4 gap-2">
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {[
           [-10_000, '−10 s'],
           [-1_000, '−1 s'],
@@ -102,7 +102,7 @@ function ClockEditModal({ game, remaining, onClose }: { game: Game; remaining: n
         ))}
       </div>
       <p className="mb-2 text-sm text-slate-400">Ou saisir le temps restant :</p>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Input type="number" inputMode="numeric" min={0} max={Math.floor(max / 60_000)} value={min} onChange={(e) => setMin(e.target.value)} className="w-24 text-center text-2xl font-bold" aria-label="Minutes" />
         <span className="text-2xl font-bold">:</span>
         <Input type="number" inputMode="numeric" min={0} max={59} value={sec} onChange={(e) => setSec(e.target.value)} className="w-24 text-center text-2xl font-bold" aria-label="Secondes" />

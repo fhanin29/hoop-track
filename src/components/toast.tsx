@@ -38,7 +38,7 @@ export function Toaster({ inline = false }: { inline?: boolean }) {
     <div
       className={cn(
         'pointer-events-none flex flex-col gap-2',
-        inline ? 'absolute inset-x-4 bottom-4 z-10 items-center' : 'fixed bottom-4 left-1/2 z-[60] w-full max-w-md -translate-x-1/2 px-4',
+        inline ? 'absolute inset-x-4 bottom-4 z-10 items-center' : 'fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-1/2 z-[60] w-full max-w-md -translate-x-1/2 px-4 md:bottom-4',
       )}
     >
       {toasts.map((t) => (

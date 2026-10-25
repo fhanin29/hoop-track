@@ -62,7 +62,7 @@ export default function PlayerDetail() {
         <ArrowLeft size={18} /> Effectif
       </Link>
       <div className="mb-6 flex flex-wrap items-center gap-5">
-        <Jersey number={player.number} className="h-20 w-20 rounded-2xl text-4xl" />
+        <Jersey number={player.number} className="h-16 w-16 rounded-2xl text-3xl! sm:h-20 sm:w-20 sm:text-4xl!" />
         <div className="flex-1">
           <h1 className="text-3xl font-black">{playerName(player)}</h1>
           <div className="mt-1 flex items-center gap-2 text-slate-400">
