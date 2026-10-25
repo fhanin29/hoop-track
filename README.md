@@ -2,6 +2,8 @@
 
 Application web (PWA) pour suivre **une équipe de basket pendant une saison** : effectif, calendrier et résultats, statistiques détaillées et **saisie en direct des actions pendant le match**. Conçue pour une **tablette Android en paysage**, elle fonctionne **entièrement hors ligne** : les données restent sur l’appareil.
 
+**Application en ligne : https://fhanin29.github.io/hoop-track/**
+
 ## Fonctionnalités
 
 | Écran | Contenu |
@@ -69,8 +71,8 @@ Sur la page d’accueil, **Charger la démo** remplit une saison fictive pour d�
 
 ## Installation sur une tablette Android
 
-1. Déployez le dossier `dist/` sur un hébergement statique en **HTTPS**, obligatoire pour une PWA. Par exemple : GitHub Pages, Netlify, Vercel ou Cloudflare Pages. Les chemins sont relatifs, donc un sous-dossier fonctionne aussi.
-2. Ouvrez l’adresse dans **Chrome** sur la tablette.
+1. L’application est publiée automatiquement sur **GitHub Pages** à chaque push sur `main` (workflow `.github/workflows/deploy.yml` : tests, build, déploiement). Tout autre hébergement statique en **HTTPS** convient aussi : déployez simplement le dossier `dist/`.
+2. Ouvrez **https://fhanin29.github.io/hoop-track/** dans **Chrome** sur la tablette.
 3. Menu ⋮ → **Ajouter à l’écran d’accueil** (ou **Installer l’application**).
 4. L’application s’ouvre en plein écran, en paysage, et fonctionne **sans connexion**. Les mises à jour s’installent automatiquement au lancement suivant.
 
