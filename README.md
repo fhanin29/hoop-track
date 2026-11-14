@@ -38,6 +38,24 @@ Pensée pour être **rapide et sans erreur**, dans les deux sens : *joueur → a
 - **Confort** : vibration à chaque saisie, écran maintenu allumé, mode plein écran.
 - **Chrono optionnel** : s’il est activé, il permet de calculer les minutes jouées de chaque joueur.
 
+### Saisie vocale (optionnelle)
+
+À activer dans **Réglages → Saisie vocale** (ou dans les options du match). Le modèle de reconnaissance (Whisper « base », environ 80 Mo) se télécharge une fois, avec une connexion ; ensuite tout fonctionne **hors ligne et sur l’appareil** : aucun son n’est envoyé sur Internet.
+
+Pendant le match, **maintenez le bouton micro** et dites le numéro puis l’action :
+
+| Phrase | Résultat |
+| --- | --- |
+| « 7, trois points réussi, passe du 10 » | tir à 3 pts + passe décisive |
+| « 12, deux points raté, rebond du 4 » | tir raté + rebond offensif |
+| « 4, panier raquette » / « 7, trois points coin gauche raté » | tir avec sa zone |
+| « 10, lancers un sur deux » / « 4, faute provoquée, lancers un sur deux » | lancers francs |
+| « 7, rebond offensif », « 7, interception », « 7, contre », « 7, balle perdue », « 7, faute » | actions simples (« rebond » seul = défensif) |
+| « adversaire plus deux » | panier adverse |
+| « 8 remplace 12 » / « entre le 8, sort le 12 » | changement |
+
+La transcription se fait en arrière-plan : la saisie tactile n’est jamais bloquée et l’action est datée de l’instant où vous avez parlé. Une phrase non comprise reste dans **Options → Dictées**, où vous pouvez la réécouter et la corriger au clavier. Un tir dicté avec sa zone est placé au centre de la zone sur la carte des tirs.
+
 ### Statistiques calculées
 
 Points, tirs (2 pts, 3 pts, LF) et pourcentages, eFG %, rebonds offensifs et défensifs, passes décisives, interceptions, contres, balles perdues, fautes commises et provoquées, minutes, +/-, évaluation.

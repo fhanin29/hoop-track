@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { Game, GameEvent, Player, Season } from '../domain/types'
+import type { VoiceClip } from '../voice/types'
 
 export interface Setting {
   key: string
@@ -12,6 +13,7 @@ export class HoopDB extends Dexie {
   games!: EntityTable<Game, 'id'>
   events!: EntityTable<GameEvent, 'id'>
   settings!: EntityTable<Setting, 'key'>
+  voiceClips!: EntityTable<VoiceClip, 'id'>
 
   constructor(name = 'hoop-track') {
     super(name)
@@ -21,6 +23,10 @@ export class HoopDB extends Dexie {
       games: 'id, seasonId, date',
       events: 'id, gameId, [gameId+seq]',
       settings: 'key',
+    })
+    // Dictées vocales : l'audio reste sur l'appareil et n'entre pas dans la sauvegarde JSON
+    this.version(2).stores({
+      voiceClips: 'id, gameId',
     })
   }
 }

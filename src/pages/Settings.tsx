@@ -7,6 +7,8 @@ import { useSeason, useSeasons, useSettings } from '../hooks/data'
 import { download } from '../lib/export'
 import { Badge, Button, Card, ConfirmDialog, Field, Input, Modal, PageHeader, Segmented, Spinner, Toggle, cn } from '../components/ui'
 import { toast } from '../components/toast'
+import { voiceSupported } from '../voice/recorder'
+import { isModelCached, loadModel } from '../voice/stt'
 
 const COLORS = ['#f97316', '#ef4444', '#eab308', '#22c55e', '#14b8a6', '#0ea5e9', '#6366f1', '#a855f7', '#ec4899', '#94a3b8']
 
@@ -173,6 +175,8 @@ export default function Settings() {
           </div>
         </Card>
 
+        <VoiceCard enabled={settings.voice} />
+
         <Card title="Données">
           <p className="mb-4 text-sm text-slate-400">
             Les données sont enregistrées uniquement sur cette tablette. Pensez à faire une sauvegarde régulièrement (par exemple après chaque match).
@@ -282,5 +286,50 @@ function NewSeasonModal({ onClose, current }: { onClose: () => void; current: Se
       </div>
       <p className="mt-2 text-sm text-slate-500">La saison actuelle reste consultable : vous pourrez la réactiver à tout moment.</p>
     </Modal>
+  )
+}
+
+function VoiceCard({ enabled }: { enabled: boolean }) {
+  const [cached, setCached] = useState<boolean | null>(null)
+  const [progress, setProgress] = useState<number | null>(null)
+
+  useEffect(() => {
+    isModelCached().then(setCached)
+  }, [])
+
+  const fetchModel = async () => {
+    setProgress(0)
+    try {
+      await loadModel(setProgress)
+      setCached(true)
+      toast('Modèle vocal prêt, utilisable hors ligne')
+    } catch {
+      toast('Téléchargement impossible : vérifiez la connexion', { tone: 'error' })
+    } finally {
+      setProgress(null)
+    }
+  }
+
+  if (!voiceSupported()) {
+    return (
+      <Card title="Saisie vocale">
+        <p className="text-sm text-slate-400">Ce navigateur ne permet pas l’enregistrement audio.</p>
+      </Card>
+    )
+  }
+  return (
+    <Card title="Saisie vocale">
+      <p className="mb-2 text-sm text-slate-400">
+        Pendant le match, maintenez le bouton micro et dites le numéro puis l’action : « 7, trois points réussi, passe du 10 ». La reconnaissance se fait sur la
+        tablette : aucun son n’est envoyé sur Internet.
+      </p>
+      <Toggle checked={enabled} onChange={(v) => setSetting('voice', v)} label="Afficher le bouton micro pendant le match" />
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Button onClick={fetchModel} disabled={progress !== null || cached === true}>
+          <Download size={18} /> {progress !== null ? `Téléchargement… ${Math.round(progress * 100)} %` : 'Télécharger le modèle vocal (environ 80 Mo)'}
+        </Button>
+        {cached !== null && <Badge tone={cached ? 'green' : 'amber'}>{cached ? 'Modèle prêt, hors ligne' : 'Modèle non téléchargé'}</Badge>}
+      </div>
+    </Card>
   )
 }

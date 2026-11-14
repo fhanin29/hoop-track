@@ -1,4 +1,4 @@
-import type { NewEvent } from '../db/repo'
+import type { LinkedNewEvent, NewEvent } from '../db/repo'
 import { ZONE_ANCHORS } from '../domain/court'
 import type { Player, ZoneId } from '../domain/types'
 import { NUMBER_HOMOPHONES, wordsToDigits } from './numbers'
@@ -13,7 +13,7 @@ export interface VoiceContext {
 }
 
 /** Événement à créer. `linkTo` : index, dans la même liste, de l'événement auquel le rattacher (`linkedEventId`). */
-export type VoiceEvent = NewEvent & { linkTo?: number }
+export type VoiceEvent = LinkedNewEvent
 
 export type VoiceResult =
   | { ok: true; events: VoiceEvent[]; normalized: string }
