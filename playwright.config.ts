@@ -5,6 +5,9 @@ const common = {
   hasTouch: true,
   locale: 'fr-FR',
   serviceWorkers: 'block' as const,
+  // Micro factice pour les tests de saisie vocale
+  permissions: ['microphone'],
+  launchOptions: { args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] },
 }
 
 export default defineConfig({

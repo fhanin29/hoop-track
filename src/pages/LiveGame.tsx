@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
-import { ArrowLeft, ArrowRightLeft, Flag, History, Maximize, Settings2, SkipForward, Undo2 } from 'lucide-react'
+import { ArrowLeft, ArrowRightLeft, Flag, History, Maximize, Mic, Settings2, SkipForward, Undo2 } from 'lucide-react'
 import type { Game, GameEvent, Player, ZoneId } from '../domain/types'
 import { describeEvent, periodLabel } from '../domain/types'
 import { ZONES, detectZone, isThreePoint } from '../domain/court'
 import { computeLiveState, formatClock, type Shot } from '../domain/stats'
-import { addEvents, deleteEvents, finishGame, lastEvent, setClockEnabled, setPeriod, setSetting, updateEvent, type NewEvent } from '../db/repo'
+import { addEvents, countFouls, deleteEvents, finishGame, lastEvent, setClockEnabled, setPeriod, setSetting, updateEvent, type NewEvent } from '../db/repo'
 import { useGame, useGameEvents, usePlayerMap, useSeason, useSettings } from '../hooks/data'
 import { setVibrationEnabled, toggleFullscreen, useWakeLock, vibrate } from '../hooks/device'
 import { Court } from '../components/Court'
@@ -16,6 +16,8 @@ import { SubModal } from '../components/live/SubModal'
 import { FollowUpPanel, PlayerChoices, type FollowUp } from '../components/live/FollowUp'
 import { EventEditModal } from '../components/live/EventEditModal'
 import { ClockControl } from '../components/live/ClockControl'
+import { MicButton, VoiceClipsModal } from '../components/live/Voice'
+import { useVoice, useVoiceClips } from '../voice/useVoice'
 
 interface ShotDraft {
   x: number
@@ -54,7 +56,7 @@ export default function LiveGame() {
   if (game === null) return <Navigate to="/matchs" replace />
   if (!game || !events || !season) return <Spinner />
   if (game.status !== 'live') return <Navigate to={`/matchs/${game.id}`} replace />
-  return <LiveBoard game={game} events={events} players={players} teamName={season.teamName} vibration={settings.vibration} />
+  return <LiveBoard game={game} events={events} players={players} teamName={season.teamName} vibration={settings.vibration} voiceEnabled={settings.voice} />
 }
 
 function LiveBoard({
@@ -63,12 +65,14 @@ function LiveBoard({
   players,
   teamName,
   vibration,
+  voiceEnabled,
 }: {
   game: Game
   events: GameEvent[]
   players: Map<string, Player>
   teamName: string
   vibration: boolean
+  voiceEnabled: boolean
 }) {
   const navigate = useNavigate()
   const live = useMemo(() => computeLiveState(game, events), [game, events])
@@ -78,7 +82,7 @@ function LiveBoard({
   const [followUp, setFollowUp] = useState<FollowUp | null>(null)
   const [subOpen, setSubOpen] = useState<{ preselect?: string } | null>(null)
   const [editing, setEditing] = useState<GameEvent | null>(null)
-  const [dialog, setDialog] = useState<'finish' | 'next' | 'options' | 'journal' | null>(null)
+  const [dialog, setDialog] = useState<'finish' | 'next' | 'options' | 'journal' | 'voice' | null>(null)
   const busy = useRef(false)
 
   const period = game.clock.period
@@ -122,17 +126,29 @@ function LiveBoard({
     if (!created) return
     if (action === 'FT_MISS') setFollowUp({ kind: 'rebound', shooterId: playerId, linkedId: created.id })
     if (action === 'FOUL_DRAWN') setFollowUp({ kind: 'ftCount', playerId })
-    if (action === 'FOUL') {
-      const fouls = (live.fouls[playerId] ?? 0) + 1
-      if (fouls >= MAX_FOULS) {
-        vibrate([120, 80, 120])
-        toast(`${shortName(p)} : ${MAX_FOULS} fautes, joueur exclu`, { tone: 'error', duration: 6000 })
-        setSubOpen({ preselect: playerId })
-      } else if (fouls === MAX_FOULS - 1) {
-        toast(`${shortName(p)} : ${fouls} fautes`, { tone: 'info' })
-      }
+    if (action === 'FOUL') announceFouls(playerId, (live.fouls[playerId] ?? 0) + 1)
+  }
+
+  /** Alerte à la 4e faute, exclusion et changement proposé à la 5e */
+  const announceFouls = (playerId: string, fouls: number) => {
+    const p = players.get(playerId)
+    if (fouls >= MAX_FOULS) {
+      vibrate([120, 80, 120])
+      toast(`${shortName(p)} : ${MAX_FOULS} fautes, joueur exclu`, { tone: 'error', duration: 6000 })
+      setSubOpen({ preselect: playerId })
+    } else if (fouls === MAX_FOULS - 1) {
+      toast(`${shortName(p)} : ${fouls} fautes`, { tone: 'info' })
     }
   }
+
+  const onVoiceEvents = async (created: GameEvent[]) => {
+    for (const e of created) {
+      if (e.type === 'FOUL' && e.playerId) announceFouls(e.playerId, await countFouls(game.id, e.playerId))
+    }
+  }
+  const voice = useVoice({ enabled: voiceEnabled, game, onCourt: live.onCourt, players, onCreated: onVoiceEvents })
+  const clips = useVoiceClips(game.id)
+  const clipCount = (status: 'pending' | 'error') => clips.filter((c) => c.status === status).length
 
   const commitShot = async (playerId: string, d: ShotDraft, made: boolean) => {
     const p = players.get(playerId)
@@ -368,6 +384,16 @@ function LiveBoard({
           >
             <ArrowRightLeft size={22} /> <span className="hidden md:inline">Changer</span>
           </button>
+          {voice.active && (
+            <MicButton
+              recording={voice.recording}
+              pending={clipCount('pending')}
+              errors={clipCount('error')}
+              onStart={voice.start}
+              onStop={voice.stop}
+              className="w-11 md:h-14 md:w-auto md:px-6"
+            />
+          )}
         </aside>
 
         {/* Terrain */}
@@ -551,6 +577,7 @@ function LiveBoard({
         <div className="divide-y divide-slate-800">
           <Toggle checked={game.clockEnabled} onChange={(v) => setClockEnabled(game, v)} label="Suivre le chrono (temps de jeu des joueurs)" />
           <Toggle checked={vibration} onChange={(v) => setSetting('vibration', v)} label="Vibration à chaque saisie" />
+          <Toggle checked={voiceEnabled} onChange={(v) => setSetting('voice', v)} label="Saisie vocale (bouton micro)" />
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button onClick={() => toggleFullscreen()}>
@@ -565,8 +592,15 @@ function LiveBoard({
           <Button variant="danger" onClick={() => setDialog('finish')}>
             <Flag size={18} /> Terminer le match
           </Button>
+          {(voiceEnabled || clips.length > 0) && (
+            <Button className="col-span-2" onClick={() => setDialog('voice')}>
+              <Mic size={18} /> Dictées{clipCount('error') > 0 && ` (${clipCount('error')} à vérifier)`}
+            </Button>
+          )}
         </div>
       </Modal>
+
+      <VoiceClipsModal open={dialog === 'voice'} onClose={() => setDialog(null)} game={game} clips={clips} players={players} onCreated={onVoiceEvents} />
     </div>
   )
 }

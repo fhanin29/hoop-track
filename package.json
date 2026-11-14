@@ -13,6 +13,7 @@
     "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.3.2",
     "clsx": "^2.1.1",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",

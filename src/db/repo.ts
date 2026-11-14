@@ -10,6 +10,8 @@ export interface AppSettings {
   defaultPeriods: number
   defaultPeriodLength: number
   vibration: boolean
+  /** Saisie vocale (bouton micro pendant le match) */
+  voice: boolean
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -17,6 +19,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultPeriods: 2,
   defaultPeriodLength: 30,
   vibration: true,
+  voice: false,
 }
 
 export async function getSettings(): Promise<AppSettings> {
@@ -82,9 +85,10 @@ export async function createSeason(name: string, copyFrom?: Season): Promise<Sea
 }
 
 export async function deleteSeason(id: string) {
-  await db.transaction('rw', [db.seasons, db.players, db.games, db.events], async () => {
+  await db.transaction('rw', [db.seasons, db.players, db.games, db.events, db.voiceClips], async () => {
     const gameIds = await db.games.where('seasonId').equals(id).primaryKeys()
     if (gameIds.length) await db.events.where('gameId').anyOf(gameIds as string[]).delete()
+    if (gameIds.length) await db.voiceClips.where('gameId').anyOf(gameIds as string[]).delete()
     await db.games.where('seasonId').equals(id).delete()
     await db.players.where('seasonId').equals(id).delete()
     await db.seasons.delete(id)
@@ -188,8 +192,9 @@ export async function toggleStarterPlayer(gameId: string, playerId: string): Pro
 }
 
 export async function deleteGame(id: string) {
-  await db.transaction('rw', db.games, db.events, async () => {
+  await db.transaction('rw', db.games, db.events, db.voiceClips, async () => {
     await db.events.where('gameId').equals(id).delete()
+    await db.voiceClips.where('gameId').equals(id).delete()
     await db.games.delete(id)
   })
 }
@@ -267,7 +272,13 @@ export async function setClockEnabled(game: Game, enabled: boolean) {
 
 export type NewEvent = Omit<GameEvent, 'id' | 'gameId' | 'seq' | 'period' | 'createdAt' | 'clockMs'>
 
-export async function addEvents(game: Game, items: NewEvent[]): Promise<GameEvent[]> {
+/** `linkTo` : index, dans la même liste, de l'événement auquel rattacher celui-ci */
+export type LinkedNewEvent = NewEvent & { linkTo?: number }
+
+/** Instant auquel dater les événements, quand il diffère de l'instant de l'enregistrement en base (dictée transcrite après coup) */
+export type EventMoment = Pick<GameEvent, 'period' | 'createdAt' | 'clockMs'>
+
+export async function addEvents(game: Game, items: LinkedNewEvent[], at?: EventMoment): Promise<GameEvent[]> {
   return db.transaction('rw', db.events, async () => {
     const last = await db.events
       .where('[gameId+seq]')
@@ -275,17 +286,19 @@ export async function addEvents(game: Game, items: NewEvent[]): Promise<GameEven
       .last()
     let seq = last?.seq ?? 0
     const now = Date.now()
-    const clockMs = game.clockEnabled ? clockRemaining(game.clock, now) : undefined
-    const created = items.map((item) => {
+    const clockMs = at ? at.clockMs : game.clockEnabled ? clockRemaining(game.clock, now) : undefined
+    const ids = items.map(() => newId())
+    const created = items.map(({ linkTo, ...item }, i) => {
       const e: GameEvent = {
         ...item,
-        id: newId(),
+        id: ids[i],
         gameId: game.id,
         seq: ++seq,
-        period: game.clock.period,
-        createdAt: now,
+        period: at?.period ?? game.clock.period,
+        createdAt: at?.createdAt ?? now,
       }
       if (clockMs !== undefined) e.clockMs = clockMs
+      if (linkTo !== undefined) e.linkedEventId = ids[linkTo]
       return e
     })
     await db.events.bulkAdd(created)
@@ -304,6 +317,10 @@ export async function deleteEvents(ids: string[]) {
 
 export async function updateEvent(id: string, changes: Partial<GameEvent>) {
   await db.events.update(id, changes)
+}
+
+export async function countFouls(gameId: string, playerId: string): Promise<number> {
+  return db.events.where('gameId').equals(gameId).filter((e) => e.type === 'FOUL' && e.playerId === playerId).count()
 }
 
 export async function lastEvent(gameId: string): Promise<GameEvent | undefined> {
@@ -339,8 +356,8 @@ export async function importBackup(data: unknown) {
   if (!b || b.app !== 'hoop-track' || !Array.isArray(b.seasons)) {
     throw new Error("Ce fichier n'est pas une sauvegarde Hoop Track valide.")
   }
-  await db.transaction('rw', [db.seasons, db.players, db.games, db.events, db.settings], async () => {
-    await Promise.all([db.seasons.clear(), db.players.clear(), db.games.clear(), db.events.clear(), db.settings.clear()])
+  await db.transaction('rw', [db.seasons, db.players, db.games, db.events, db.settings, db.voiceClips], async () => {
+    await Promise.all([db.seasons.clear(), db.players.clear(), db.games.clear(), db.events.clear(), db.settings.clear(), db.voiceClips.clear()])
     await db.seasons.bulkAdd(b.seasons)
     await db.players.bulkAdd(b.players ?? [])
     await db.games.bulkAdd(b.games ?? [])
@@ -350,7 +367,7 @@ export async function importBackup(data: unknown) {
 }
 
 export async function resetAll() {
-  await db.transaction('rw', [db.seasons, db.players, db.games, db.events, db.settings], async () => {
-    await Promise.all([db.seasons.clear(), db.players.clear(), db.games.clear(), db.events.clear(), db.settings.clear()])
+  await db.transaction('rw', [db.seasons, db.players, db.games, db.events, db.settings, db.voiceClips], async () => {
+    await Promise.all([db.seasons.clear(), db.players.clear(), db.games.clear(), db.events.clear(), db.settings.clear(), db.voiceClips.clear()])
   })
 }
