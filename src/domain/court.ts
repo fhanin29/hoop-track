@@ -70,3 +70,19 @@ export function clampToCourt(x: number, y: number): { x: number; y: number } {
     y: Math.min(COURT.length, Math.max(0, y)),
   }
 }
+
+/**
+ * Point représentatif de chaque zone (mètres). Sert à placer un tir dont on ne connaît
+ * que la zone (saisie vocale) : il compte ainsi dans les stats par zone.
+ */
+export const ZONE_ANCHORS: Record<ZoneId, { x: number; y: number }> = {
+  RAQ: { x: 7.5, y: 3 },
+  MI_G: { x: 3.5, y: 4 },
+  MI_AXE: { x: 7.5, y: 6.8 },
+  MI_D: { x: 11.5, y: 4 },
+  C3_G: { x: 0.45, y: 1.5 },
+  A3_G: { x: 1.8, y: 6.5 },
+  AXE3: { x: 7.5, y: 9 },
+  A3_D: { x: 13.2, y: 6.5 },
+  C3_D: { x: 14.55, y: 1.5 },
+}
